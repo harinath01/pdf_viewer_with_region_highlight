@@ -24,31 +24,6 @@ export default function Home() {
   const [currentFile] = useState<string>('./attention_is_all_you_need.pdf');
   const [areas, setAreas] = useState<HighlightArea[]>([]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const boxes = JSON.parse(boundingBoxes) as BoundingBox[];
-      const highlightAreas: HighlightArea[] = boxes.map((box) => {
-        const [min_x, min_y, max_x, max_y] = box.bbox;
-        const pageHeight = box.pageHeight;
-        const pageWidth = 612; // Standard US Letter width in points
-
-        // Convert to percentages
-        return {
-          pageIndex: box.pageIndex,
-          left: (min_x / pageWidth) * 100,
-          top: (min_y / pageHeight) * 100,
-          width: ((max_x - min_x) / pageWidth) * 100,
-          height: ((max_y - min_y) / pageHeight) * 100
-        };
-      });
-      console.log(highlightAreas);
-      setAreas(highlightAreas);
-    } catch (error) {
-      console.error('Invalid JSON format:', error);
-    }
-  };
-
   const renderHighlights = (props: RenderHighlightsProps) => (
     <div>
       {areas
@@ -71,6 +46,37 @@ export default function Home() {
     renderHighlights,
     trigger: Trigger.None,
   });
+  const { jumpToHighlightArea } = highlightPluginInstance;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const boxes = JSON.parse(boundingBoxes) as BoundingBox[];
+      const highlightAreas: HighlightArea[] = boxes.map((box) => {
+        const [min_x, min_y, max_x, max_y] = box.bbox;
+        const pageHeight = box.pageHeight;
+        const pageWidth = 612; // Standard US Letter width in points
+
+        // Convert to percentages
+        return {
+          pageIndex: box.pageIndex,
+          left: (min_x / pageWidth) * 100,
+          top: (min_y / pageHeight) * 100,
+          width: ((max_x - min_x) / pageWidth) * 100,
+          height: ((max_y - min_y) / pageHeight) * 100
+        };
+      });
+      console.log(highlightAreas);
+      setAreas(highlightAreas);
+      jumpToHighlightArea(highlightAreas[0]);
+    } catch (error) {
+      console.error('Invalid JSON format:', error);
+    }
+  };
+
+
+
+
 
   const dropPluginInstance = dropPlugin();
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
