@@ -1,103 +1,114 @@
-import Image from "next/image";
+'use client';
+
+import { Worker, Viewer } from '@react-pdf-viewer/core';
+import { dropPlugin } from '@react-pdf-viewer/drop';
+import { themePlugin } from '@react-pdf-viewer/theme';
+import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
+import { highlightPlugin, Trigger, type HighlightArea, type RenderHighlightsProps } from '@react-pdf-viewer/highlight';
+import { useState } from 'react';
+
+// Import styles
+import '@react-pdf-viewer/core/lib/styles/index.css';
+import '@react-pdf-viewer/drop/lib/styles/index.css';
+import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+import '@react-pdf-viewer/highlight/lib/styles/index.css';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [boundingBoxes, setBoundingBoxes] = useState<string>('');
+  const [currentFile, _] = useState<string>('/attention_is_all_you_need.pdf');
+  const [areas, setAreas] = useState<HighlightArea[]>([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const boxes = JSON.parse(boundingBoxes);
+      const highlightAreas: HighlightArea[] = boxes.map((box: any) => {
+        const [min_x, min_y, max_x, max_y] = box.bbox;
+        const pageHeight = box.pageHeight;
+        const pageWidth = 612; // Standard US Letter width in points
+
+        // Convert to percentages
+        return {
+          pageIndex: box.pageIndex,
+          left: (min_x / pageWidth) * 100,
+          top: (min_y / pageHeight) * 100,
+          width: ((max_x - min_x) / pageWidth) * 100,
+          height: ((max_y - min_y) / pageHeight) * 100
+        };
+      });
+      console.log(highlightAreas);
+      setAreas(highlightAreas);
+    } catch (error) {
+      console.error('Invalid JSON format:', error);
+    }
+  };
+
+  const renderHighlights = (props: RenderHighlightsProps) => (
+    <div>
+      {areas
+        .filter((area) => area.pageIndex === props.pageIndex)
+        .map((area, idx) => (
+          <div
+            key={idx}
+            className="highlight-area"
+            style={{
+              background: 'yellow',
+              opacity: 0.4,
+              ...props.getCssProperties(area, props.rotation)
+            }}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        ))}
     </div>
+  );
+
+  const highlightPluginInstance = highlightPlugin({
+    renderHighlights,
+    trigger: Trigger.None,
+  });
+
+  const dropPluginInstance = dropPlugin();
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
+  const themePluginInstance = themePlugin();
+
+  return (
+    <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+      <div className="flex h-screen">
+        <div className="w-2/3 h-full overflow-auto">
+          <Viewer
+            fileUrl={currentFile}
+            plugins={[dropPluginInstance, defaultLayoutPluginInstance, themePluginInstance, highlightPluginInstance]}
+          />
+        </div>
+
+        <div className="w-1/3 h-full bg-white border-l border-gray-200 shadow-lg">
+          <div className="p-6 h-64 flex flex-col">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Bounding Boxes</h2>
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
+              <div className="flex-1">
+                <label htmlFor="boundingBoxes" className="block text-sm font-medium text-gray-700 mb-2">
+                  Enter JSON Format
+                </label>
+                <textarea
+                  id="boundingBoxes"
+                  value={boundingBoxes}
+                  onChange={(e) => setBoundingBoxes(e.target.value)}
+                  className="w-full min-h-[300px] p-4 text-sm font-mono bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500"
+                  placeholder='[{ "pageIndex": 0, "x": 10, "y": 10, "width": 20, "height": 10 }]'
+                  style={{ color: "#222" }}
+                />
+              </div>
+              <div className="mt-6">
+                <button
+                  type="submit"
+                  className="w-full px-4 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium transition-colors"
+                >
+                  Apply Bounding Boxes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </Worker>
   );
 }
