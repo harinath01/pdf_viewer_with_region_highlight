@@ -13,16 +13,22 @@ import '@react-pdf-viewer/drop/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import '@react-pdf-viewer/highlight/lib/styles/index.css';
 
+interface BoundingBox {
+  pageIndex: number;
+  bbox: [number, number, number, number];  // [min_x, min_y, max_x, max_y]
+  pageHeight: number;
+}
+
 export default function Home() {
   const [boundingBoxes, setBoundingBoxes] = useState<string>('');
-  const [currentFile, _] = useState<string>('/attention_is_all_you_need.pdf');
+  const [currentFile] = useState<string>('/attention_is_all_you_need.pdf');
   const [areas, setAreas] = useState<HighlightArea[]>([]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const boxes = JSON.parse(boundingBoxes);
-      const highlightAreas: HighlightArea[] = boxes.map((box: any) => {
+      const boxes = JSON.parse(boundingBoxes) as BoundingBox[];
+      const highlightAreas: HighlightArea[] = boxes.map((box) => {
         const [min_x, min_y, max_x, max_y] = box.bbox;
         const pageHeight = box.pageHeight;
         const pageWidth = 612; // Standard US Letter width in points
