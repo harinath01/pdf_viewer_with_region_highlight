@@ -21,7 +21,7 @@ interface BoundingBox {
 
 export default function Home() {
   const [boundingBoxes, setBoundingBoxes] = useState<string>('');
-  const [currentFile] = useState<string>('/attention_is_all_you_need.pdf');
+  const [currentFile] = useState<string>('./attention_is_all_you_need.pdf');
   const [areas, setAreas] = useState<HighlightArea[]>([]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -99,7 +99,7 @@ export default function Home() {
                   value={boundingBoxes}
                   onChange={(e) => setBoundingBoxes(e.target.value)}
                   className="w-full min-h-[300px] p-4 text-sm font-mono bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500"
-                  placeholder='[{ "pageIndex": 0, "x": 10, "y": 10, "width": 20, "height": 10 }]'
+                  placeholder='[{ "pageIndex": 0, "bbox": [0.0, 0.0, 612.0, 792.0], "pageHeight": 792 }]'
                   style={{ color: "#222" }}
                 />
               </div>
