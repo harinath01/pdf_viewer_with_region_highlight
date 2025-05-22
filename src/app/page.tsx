@@ -27,7 +27,23 @@ export default function Home() {
   const [pageHeight, setPageHeight] = useState<number>(792);
   const [pageWidth, setPageWidth] = useState<number>(612);
 
-  const handleDocumentLoad = (e: DocumentLoadEvent) => {   
+  const getColorByIndex = (index: number) => {
+    const colors = [
+      '#98FB98', // Pale Green
+      '#FFB6C1', // Light Pink
+      '#87CEEB', // Sky Blue
+      '#DDA0DD', // Plum
+      '#F0E68C', // Khaki
+      '#E6E6FA', // Lavender
+      '#FFA07A', // Light Salmon
+      '#98FF98', // Mint Green
+      '#B0E0E6', // Powder Blue
+      '#FFDAB9', // Peach
+    ];
+    return colors[index % colors.length];
+  };
+
+  const handleDocumentLoad = (e: DocumentLoadEvent) => {
     e.doc.getPage(1).then((page: PdfJs.Page) => {
       const viewport = page.getViewport({ scale: 1 });
       setPageHeight(viewport.height);
@@ -44,7 +60,7 @@ export default function Home() {
             key={idx}
             className="highlight-area"
             style={{
-              background: 'yellow',
+              background: getColorByIndex(idx),
               opacity: 0.4,
               ...props.getCssProperties(area, props.rotation)
             }}
@@ -82,10 +98,6 @@ export default function Home() {
       console.error('Invalid JSON format:', error);
     }
   };
-
-
-
-
 
   const dropPluginInstance = dropPlugin();
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
