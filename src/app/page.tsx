@@ -1,6 +1,7 @@
 'use client';
 
 import { Worker, Viewer } from '@react-pdf-viewer/core';
+import type { DocumentLoadEvent, PdfJs } from '@react-pdf-viewer/core';
 import { dropPlugin } from '@react-pdf-viewer/drop';
 import { themePlugin } from '@react-pdf-viewer/theme';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
@@ -23,6 +24,16 @@ export default function Home() {
   const [boundingBoxes, setBoundingBoxes] = useState<string>('');
   const [currentFile] = useState<string>('./attention_is_all_you_need.pdf');
   const [areas, setAreas] = useState<HighlightArea[]>([]);
+  const [pageHeight, setPageHeight] = useState<number>(792);
+  const [pageWidth, setPageWidth] = useState<number>(612);
+
+  const handleDocumentLoad = (e: DocumentLoadEvent) => {   
+    e.doc.getPage(1).then((page: PdfJs.Page) => {
+      const viewport = page.getViewport({ scale: 1 });
+      setPageHeight(viewport.height);
+      setPageWidth(viewport.width)
+    });
+  };
 
   const renderHighlights = (props: RenderHighlightsProps) => (
     <div>
@@ -54,8 +65,6 @@ export default function Home() {
       const boxes = JSON.parse(boundingBoxes) as BoundingBox[];
       const highlightAreas: HighlightArea[] = boxes.map((box) => {
         const [min_x, min_y, max_x, max_y] = box.bbox;
-        const pageHeight = box.pageHeight;
-        const pageWidth = 612; // Standard US Letter width in points
 
         // Convert to percentages
         return {
@@ -88,6 +97,7 @@ export default function Home() {
         <div className="w-2/3 h-full overflow-auto">
           <Viewer
             fileUrl={currentFile}
+            onDocumentLoad={handleDocumentLoad}
             plugins={[dropPluginInstance, defaultLayoutPluginInstance, themePluginInstance, highlightPluginInstance]}
           />
         </div>
