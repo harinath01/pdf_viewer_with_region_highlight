@@ -15,32 +15,20 @@ import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import '@react-pdf-viewer/highlight/lib/styles/index.css';
 
 interface BoundingBox {
-  pageIndex: number;
+  page: number;
   bbox: [number, number, number, number];  // [min_x, min_y, max_x, max_y]
   pageHeight: number;
 }
 
 export default function Home() {
-  const [boundingBoxes, setBoundingBoxes] = useState<string>('');
+  const [boundingBoxes, setBoundingBoxes] = useState<string>('[{ "page": 0, "bbox": [0.0, 0.0, 612.0, 792.0], "pageHeight": 792 }]');
   const [currentFile] = useState<string>('./attention_is_all_you_need.pdf');
   const [areas, setAreas] = useState<HighlightArea[]>([]);
   const [pageHeight, setPageHeight] = useState<number>(792);
   const [pageWidth, setPageWidth] = useState<number>(612);
 
-  const getColorByIndex = (index: number) => {
-    const colors = [
-      '#98FB98', // Pale Green
-      '#FFB6C1', // Light Pink
-      '#87CEEB', // Sky Blue
-      '#DDA0DD', // Plum
-      '#F0E68C', // Khaki
-      '#E6E6FA', // Lavender
-      '#FFA07A', // Light Salmon
-      '#98FF98', // Mint Green
-      '#B0E0E6', // Powder Blue
-      '#FFDAB9', // Peach
-    ];
-    return colors[index % colors.length];
+  const getColorByIndex = () => {
+    return "yellow";
   };
 
   const handleDocumentLoad = (e: DocumentLoadEvent) => {
@@ -60,7 +48,7 @@ export default function Home() {
             key={idx}
             className="highlight-area"
             style={{
-              background: getColorByIndex(idx),
+              background: getColorByIndex(),
               opacity: 0.4,
               ...props.getCssProperties(area, props.rotation)
             }}
@@ -84,7 +72,7 @@ export default function Home() {
 
         // Convert to percentages
         return {
-          pageIndex: box.pageIndex,
+          pageIndex: box.page,
           left: (min_x / pageWidth) * 100,
           top: (min_y / pageHeight) * 100,
           width: ((max_x - min_x) / pageWidth) * 100,
